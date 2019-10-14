@@ -1,0 +1,10 @@
+README.md
+battlecityclient/BattlecityClient.py
+battlecityclient/Main.py
+battlecityclient/__init__.py
+battlecityclient.egg-info/PKG-INFO
+battlecityclient.egg-info/SOURCES.txt
+battlecityclient.egg-info/dependency_links.txt
+battlecityclient.egg-info/entry_points.txt
+battlecityclient.egg-info/requires.txt
+battlecityclient.egg-info/top_level.txt

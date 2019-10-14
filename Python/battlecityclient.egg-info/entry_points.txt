@@ -1,0 +1,3 @@
+[console_scripts]
+battlecityclient = battlecityclient.Main:main
+
