@@ -1,1 +1,0 @@
-D:\Projects\battlecity.2019\codenjoy-battlecity-clients-1\Net\CodeBattleNetLibrary\obj\Debug\CodeBattleNetLibrary.csprojAssemblyReference.cache

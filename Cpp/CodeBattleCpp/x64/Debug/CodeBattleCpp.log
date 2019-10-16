@@ -1,3 +1,0 @@
-﻿  CodeBattleCpp.cpp
-D:\Projects\battlecity.2019\codenjoy-battlecity-clients-1\Cpp\CodeBattleCpp\CodeBattleCpp.cpp(11,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  CodeBattleCpp.vcxproj -> D:\Projects\battlecity.2019\codenjoy-battlecity-clients-1\Cpp\x64\Debug\CodeBattleCpp.exe
