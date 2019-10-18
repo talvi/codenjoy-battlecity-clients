@@ -1,12 +1,49 @@
 package clientlib;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static clientlib.Elements.*;
+import static clientlib.Action.BEFORE_TURN;
+import static clientlib.Elements.AI_TANK_DOWN;
+import static clientlib.Elements.AI_TANK_LEFT;
+import static clientlib.Elements.AI_TANK_RIGHT;
+import static clientlib.Elements.AI_TANK_UP;
+import static clientlib.Elements.BATTLE_WALL;
+import static clientlib.Elements.BULLET;
+import static clientlib.Elements.CONSTRUCTION;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_DOWN;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_DOWN_LEFT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_DOWN_RIGHT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_DOWN_TWICE;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_LEFT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_LEFT_RIGHT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_LEFT_TWICE;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_RIGHT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_RIGHT_TWICE;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_RIGHT_UP;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_UP;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_UP_DOWN;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_UP_LEFT;
+import static clientlib.Elements.CONSTRUCTION_DESTROYED_UP_TWICE;
+import static clientlib.Elements.OTHER_TANK_DOWN;
+import static clientlib.Elements.OTHER_TANK_LEFT;
+import static clientlib.Elements.OTHER_TANK_RIGHT;
+import static clientlib.Elements.OTHER_TANK_UP;
+import static clientlib.Elements.TANK_DOWN;
+import static clientlib.Elements.TANK_LEFT;
+import static clientlib.Elements.TANK_RIGHT;
+import static clientlib.Elements.TANK_UP;
 
 
 public class SampleSolver extends Solver {
 
+    private Point myTank;
 
     public List<Point> getPlayerTankCoordinates(){
             List<Point> playerTank = getCoordinates(TANK_DOWN, TANK_UP, TANK_LEFT, TANK_RIGHT);
@@ -133,7 +170,79 @@ public class SampleSolver extends Solver {
 
     @Override
     public String move() {
-        return left();
+        myTank = getPlayerTankCoordinates().get(0);
+        List<Point> otherPlayersTanks = getOtherPlayersTanks();
+        otherPlayersTanks.addAll(getBotsTanks());
+        Point nearestEnemyToDestroy = getNearestEnemyToDestroy(otherPlayersTanks);
+
+        return buildMove(myTank, nearestEnemyToDestroy);
+    }
+
+    private String buildMove(Point myTank, Point nearestEnemyToDestroy) {
+        List<String> possibleTurns = new ArrayList<>();
+
+        if (myTank.y - nearestEnemyToDestroy.y < 0) {
+            // он ниже
+            possibleTurns.add(down(BEFORE_TURN));
+        }
+
+        if (myTank.y - nearestEnemyToDestroy.y > 0) {
+            // он выше
+            possibleTurns.add(up(BEFORE_TURN));
+        }
+
+        if (myTank.x - nearestEnemyToDestroy.x > 0) {
+            // он левее
+            possibleTurns.add(left(BEFORE_TURN));
+        }
+
+        if (myTank.x - nearestEnemyToDestroy.x < 0) {
+            // он правее
+            possibleTurns.add(right(BEFORE_TURN));
+        }
+
+        if (!possibleTurns.isEmpty() && possibleTurns.size() > 1) {
+            return possibleTurns.get(ThreadLocalRandom.current().nextInt(possibleTurns.size()));
+        }
+
+        if (!possibleTurns.isEmpty()) {
+            return possibleTurns.get(0);
+        }
+
+        return "";
+    }
+
+    private Point getNearestEnemyToDestroy(List<Point> otherPlayersTanks) {
+        TreeMap<Double, Point> enemyDistance = new TreeMap<>();
+        List<Point> tanksWithClearSight = getTanksWithClearSight(otherPlayersTanks);
+
+        if (!tanksWithClearSight.isEmpty()) {
+            otherPlayersTanks = tanksWithClearSight;
+        }
+
+        otherPlayersTanks.forEach(enemy -> {
+            enemyDistance.put(Math.sqrt(Math.pow((double) (enemy.x - myTank.x), 2) + Math.pow((double) (enemy.y - myTank.y), 2)), enemy);
+        });
+
+        return enemyDistance.isEmpty() ? new Point(0, 0) : enemyDistance.firstEntry().getValue();
+    }
+
+    private List<Point> getTanksWithClearSight(List<Point> otherPlayersTanks) {
+        List<Point> results = new ArrayList<>();
+        Elements[] elements = field[myTank.x];
+
+        for (Point enemy : otherPlayersTanks) {
+            if (enemy.x == myTank.x) {
+                long free = Arrays.stream(elements)
+                        .filter(el -> el.ch() == ' ')
+                        .count();
+                if (free == elements.length) {
+                    results.add(enemy);
+                }
+            }
+        }
+
+        return results;
     }
 
 }
